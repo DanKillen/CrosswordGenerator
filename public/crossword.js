@@ -301,7 +301,12 @@ async function init() {
   });
 }
 
-
+function clearCrossword() {
+  placedWords = [];
+  crosswordContainer.innerHTML = '';
+  cluesContainer.innerHTML = '';
+  init();
+}
 
 init();
 
