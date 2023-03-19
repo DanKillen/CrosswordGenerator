@@ -176,6 +176,20 @@ function letterEntry(input) {
   });
 }
 
+function assignClueNumbers() {
+  let clueNumber = 1;
+
+  placedWords.forEach((wordObj, index) => {
+    const { x, y, isHorizontal } = wordObj;
+
+    if (index === 0 || (isHorizontal && placedWords[index - 1].y !== y) || (!isHorizontal && placedWords[index - 1].x !== x)) {
+      wordObj.number = clueNumber++;
+    } else {
+      wordObj.number = placedWords[index - 1].number;
+    }
+  });
+}
+
 function renderCrossword(grid) {
   crosswordContainer.innerHTML = '';
   crosswordContainer.style.gridTemplateColumns = `repeat(${grid[0].length}, 1fr)`;
@@ -183,6 +197,8 @@ function renderCrossword(grid) {
 
   grid.forEach((row, y) => {
     row.forEach((cell, x) => {
+      const cellWrapper = document.createElement('div');
+      cellWrapper.className = 'cell-wrapper';
       const input = document.createElement('input');
       input.classList.add('cell');
       input.maxLength = 1;
@@ -199,6 +215,13 @@ function renderCrossword(grid) {
 
         placedWords.forEach((wordObj, index) => {
           const { x: wordX, y: wordY, isHorizontal, word } = wordObj;
+
+          if (wordX === x && wordY === y) {
+            const cellNumber = document.createElement('div');
+            cellNumber.classList.add('cell-number');
+            cellNumber.textContent = wordObj.number;
+            cellWrapper.appendChild(cellNumber);
+          }
         
           for (let i = 0; i < word.length; i++) {
             const xi = isHorizontal ? wordX + i : wordX;
@@ -213,7 +236,8 @@ function renderCrossword(grid) {
 
         letterEntry(input);
       }
-      crosswordContainer.appendChild(input);
+      cellWrapper.appendChild(input); // Change this line
+      crosswordContainer.appendChild(cellWrapper); // Change this line
     });
   });
   renderClues();
@@ -260,23 +284,23 @@ async function init() {
   const clues = await cluesData.json();
   const layout = [
     { x: 0, y: 0, isHorizontal: true, length: 10 },
-    { x: 6, y: 4, isHorizontal: true, length: 4 },
-    { x: 0, y: 6, isHorizontal: true, length: 6 },
-    { x: 0, y: 8, isHorizontal: true, length: 4 },
-    { x: 4, y: 9, isHorizontal: true, length: 6 },
     { x: 0, y: 0, isHorizontal: false, length: 5 },
     { x: 2, y: 0, isHorizontal: false, length: 5 },
     { x: 4, y: 0, isHorizontal: false, length: 5 },
     { x: 6, y: 0, isHorizontal: false, length: 5 },
-    { x: 8, y: 0, isHorizontal: false, length: 5 },
-    { x: 0, y: 6, isHorizontal: false, length: 4 },
-    { x: 7, y: 4, isHorizontal: false, length: 4 },
-    { x: 9, y: 4, isHorizontal: false, length: 6 },
+    { x: 8, y: 0, isHorizontal: false, length: 5 },    
+    { x: 6, y: 4, isHorizontal: true, length: 4 },
+    { x: 7, y: 4, isHorizontal: false, length: 4 },      
+    { x: 9, y: 4, isHorizontal: false, length: 6 },  
+    { x: 0, y: 6, isHorizontal: true, length: 6 },
+    { x: 0, y: 6, isHorizontal: false, length: 4 },  
+    { x: 0, y: 8, isHorizontal: true, length: 4 },   
     { x: 4, y: 7, isHorizontal: false, length: 4 },
-    { x: 5, y: 6, isHorizontal: false, length: 4 },
+    { x: 4, y: 9, isHorizontal: true, length: 6 },
   ];
 
   const { grid, placedWords } = generateCrossword(clues, layout);
+  assignClueNumbers();
   renderCrossword(grid, placedWords);
   const toggleFocusBtn = document.getElementById('toggle-focus-mode');
 

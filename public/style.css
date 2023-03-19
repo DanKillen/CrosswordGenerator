@@ -22,6 +22,17 @@ body {
     line-height: 30px;
   }
 
+  .cell-wrapper {
+    position: relative;
+  }
+  .cell-number {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    font-size: 10px;
+    font-weight: bold;
+  }
+
   .correct {
     background-color: lightgreen;
   }
