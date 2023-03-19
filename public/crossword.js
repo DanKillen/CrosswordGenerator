@@ -3,6 +3,37 @@ const cluesContainer = document.getElementById('clues-container');
 const revealBtn = document.querySelector('#reveal-container button');
 let focusMode = 'horizontal';
 let placedWords = [];
+const potentialLayouts = [
+  [
+    { "x": 0, "y": 0, "isHorizontal": true, "length": 10 },
+    { "x": 0, "y": 0, "isHorizontal": false, "length": 5 },
+    { "x": 7, "y": 0, "isHorizontal": false, "length": 5 },
+    { "x": 9, "y": 0, "isHorizontal": false, "length": 5 },
+    { "x": 0, "y": 3, "isHorizontal": true, "length": 6 },
+    { "x": 5, "y": 3, "isHorizontal": false, "length": 4 },
+    { "x": 0, "y": 6, "isHorizontal": true, "length": 10 },
+    { "x": 0, "y": 6, "isHorizontal": false, "length": 4 },
+    { "x": 7, "y": 6, "isHorizontal": false, "length": 4 },
+    { "x": 9, "y": 6, "isHorizontal": false, "length": 4 },
+    { "x": 0, "y": 9, "isHorizontal": true, "length": 6 },
+  ],
+  [
+    { x: 0, y: 0, isHorizontal: true, length: 10 },
+    { x: 0, y: 0, isHorizontal: false, length: 5 },
+    { x: 2, y: 0, isHorizontal: false, length: 5 },
+    { x: 4, y: 0, isHorizontal: false, length: 5 },
+    { x: 6, y: 0, isHorizontal: false, length: 5 },
+    { x: 8, y: 0, isHorizontal: false, length: 5 },
+    { x: 6, y: 4, isHorizontal: true, length: 4 },
+    { x: 7, y: 4, isHorizontal: false, length: 4 },
+    { x: 9, y: 4, isHorizontal: false, length: 6 },
+    { x: 0, y: 6, isHorizontal: true, length: 6 },
+    { x: 0, y: 6, isHorizontal: false, length: 4 },
+    { x: 0, y: 8, isHorizontal: true, length: 4 },
+    { x: 4, y: 7, isHorizontal: false, length: 4 },
+    { x: 4, y: 9, isHorizontal: true, length: 6 },
+  ]
+];
 
 
 async function fetchData() {
@@ -83,7 +114,7 @@ function placeWord(grid, word, x, y, isHorizontal) {
   }
 }
 
-function generateCrossword(words, layout) {
+function generateCrossword(words, layout, placedWords = []) {
   const size = 10;
   const grid = createEmptyGrid(size);
 
@@ -176,19 +207,6 @@ function letterEntry(input) {
   });
 }
 
-function assignClueNumbers() {
-  let clueNumber = 1;
-
-  placedWords.forEach((wordObj, index) => {
-    const { x, y, isHorizontal } = wordObj;
-
-    if (index === 0 || (isHorizontal && placedWords[index - 1].y !== y) || (!isHorizontal && placedWords[index - 1].x !== x)) {
-      wordObj.number = clueNumber++;
-    } else {
-      wordObj.number = placedWords[index - 1].number;
-    }
-  });
-}
 
 function renderCrossword(grid) {
   crosswordContainer.innerHTML = '';
@@ -222,11 +240,11 @@ function renderCrossword(grid) {
             cellNumber.textContent = wordObj.number;
             cellWrapper.appendChild(cellNumber);
           }
-        
+
           for (let i = 0; i < word.length; i++) {
             const xi = isHorizontal ? wordX + i : wordX;
             const yi = isHorizontal ? wordY : wordY + i;
-        
+
             const cell = document.getElementById(`cell-${xi}-${yi}`);
             if (cell) {
               cell.classList.add(`wordid-${index}`);
@@ -236,8 +254,8 @@ function renderCrossword(grid) {
 
         letterEntry(input);
       }
-      cellWrapper.appendChild(input); // Change this line
-      crosswordContainer.appendChild(cellWrapper); // Change this line
+      cellWrapper.appendChild(input);
+      crosswordContainer.appendChild(cellWrapper);
     });
   });
   renderClues();
@@ -282,22 +300,10 @@ function renderClues() {
 async function init() {
   const cluesData = await fetch('/api/clues');
   const clues = await cluesData.json();
-  const layout = [
-    { x: 0, y: 0, isHorizontal: true, length: 10 },
-    { x: 0, y: 0, isHorizontal: false, length: 5 },
-    { x: 2, y: 0, isHorizontal: false, length: 5 },
-    { x: 4, y: 0, isHorizontal: false, length: 5 },
-    { x: 6, y: 0, isHorizontal: false, length: 5 },
-    { x: 8, y: 0, isHorizontal: false, length: 5 },    
-    { x: 6, y: 4, isHorizontal: true, length: 4 },
-    { x: 7, y: 4, isHorizontal: false, length: 4 },      
-    { x: 9, y: 4, isHorizontal: false, length: 6 },  
-    { x: 0, y: 6, isHorizontal: true, length: 6 },
-    { x: 0, y: 6, isHorizontal: false, length: 4 },  
-    { x: 0, y: 8, isHorizontal: true, length: 4 },   
-    { x: 4, y: 7, isHorizontal: false, length: 4 },
-    { x: 4, y: 9, isHorizontal: true, length: 6 },
-  ];
+  const layout = potentialLayouts[Math.floor(Math.random() * potentialLayouts.length)];
+
+  crosswordContainer.innerHTML = '';
+  cluesContainer.innerHTML = '';
 
   const { grid, placedWords } = generateCrossword(clues, layout);
   assignClueNumbers();
