@@ -11,14 +11,6 @@ async function fetchData() {
   return data;
 }
 
-function buildGrid(size) {
-  const grid = new Array(size);
-  for (let i = 0; i < size; i++) {
-    grid[i] = new Array(size).fill('.');
-  }
-  return grid;
-}
-
 function createEmptyGrid(size) {
   const grid = [];
   for (let y = 0; y < size; y++) {
@@ -29,10 +21,6 @@ function createEmptyGrid(size) {
     grid.push(row);
   }
   return grid;
-}
-
-function findWordsWithLength(words, length) {
-  return words.filter((wordObj) => wordObj.answer.length === length);
 }
 
 function canPlaceWord(grid, word, x, y, isHorizontal) {
@@ -198,36 +186,37 @@ function renderCrossword(grid) {
       } else {
         input.dataset.char = cell;
         input.id = `cell-${x}-${y}`;
-
-        placedWords.forEach((wordObj, index) => {
-          const { x: wordX, y: wordY, isHorizontal, word } = wordObj;
-
-          if (wordX === x && wordY === y) {
-            const cellNumber = document.createElement('div');
-            cellNumber.classList.add('cell-number');
-            cellNumber.textContent = wordObj.number;
-            cellWrapper.appendChild(cellNumber);
-          }
-        
-          for (let i = 0; i < word.length; i++) {
-            const xi = isHorizontal ? wordX + i : wordX;
-            const yi = isHorizontal ? wordY : wordY + i;
-        
-            const cell = document.getElementById(`cell-${xi}-${yi}`);
-            if (cell) {
-              cell.classList.add(`wordid-${index}`);
-            }
-          }
-        });
-
         letterEntry(input);
       }
-      cellWrapper.appendChild(input); // Change this line
-      crosswordContainer.appendChild(cellWrapper); // Change this line
+      cellWrapper.appendChild(input);
+      crosswordContainer.appendChild(cellWrapper);
     });
   });
+
+  placedWords.forEach((wordObj, index) => {
+    const { x: wordX, y: wordY, isHorizontal, word } = wordObj;
+
+    if (grid[wordY][wordX] !== '.') {
+      const cellNumber = document.createElement('div');
+      cellNumber.classList.add('cell-number');
+      cellNumber.textContent = wordObj.number;
+      const cellNumberParent = document.getElementById(`cell-${wordX}-${wordY}`).parentElement;
+      cellNumberParent.appendChild(cellNumber);
+    }
+
+    for (let i = 0; i < word.length; i++) {
+      const xi = isHorizontal ? wordX + i : wordX;
+      const yi = isHorizontal ? wordY : wordY + i;
+      const cell = document.getElementById(`cell-${xi}-${yi}`);
+      if (cell && grid[yi][xi] !== '.') {
+        cell.classList.add(`wordid-${index}`);
+      }
+    }
+  });
+
   renderClues();
 }
+
 
 function assignClueNumbers() {
   let clueNumber = 1;
