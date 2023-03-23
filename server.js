@@ -10,15 +10,6 @@ const csvFilePath = './cluesReworkedFormatted.csv'; // Replace this with the pat
 app.use(cors());
 app.use(express.static('public'));
 
-function getRandomClues(clues, count) {
-  const randomClues = [];
-  for (let i = 0; i < count; i++) {
-    const randomIndex = Math.floor(Math.random() * clues.length);
-    randomClues.push(clues[randomIndex]);
-  }
-  return randomClues;
-}
-
 app.get('/api/clues', (req, res) => {
     const clues = [];
     fs.createReadStream(csvFilePath)

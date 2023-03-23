@@ -77,8 +77,14 @@ function generateCrossword(words, layout) {
 
 
   for (let i = 0; i < layout.length; i++) {
-    const { x, y, isHorizontal, length } = layout[i];
+    //const { x, y, isHorizontal, length } = layout[i];
+    const x = layout[i].x;
+    const y = layout[i].y;
+    const isHorizontal = layout[i].isHorizontal;
+     length = layout[i].length;
     let availableWords = words.slice();
+
+    let placedWordObj;
 
     while (availableWords.length > 0) {
       const randomWordIndex = Math.floor(Math.random() * availableWords.length);
@@ -87,14 +93,16 @@ function generateCrossword(words, layout) {
 
       if (word.length === length && canPlaceWord(grid, word, x, y, isHorizontal, placedWords)) {
         placeWord(grid, word, x, y, isHorizontal);
-        placedWords.push({ x, y, isHorizontal, clue: wordObj.clue, word });
+        placedWordObj = { x, y, isHorizontal, clue: wordObj.clue, word };
         break;
       }
 
       availableWords.splice(randomWordIndex, 1);
     }
 
-    if (availableWords.length === 0) {
+    if (placedWordObj) {
+      placedWords.push(placedWordObj);
+    } else {
       console.warn(`Failed to place a word for the layout at index ${i}`);
     }
   }
@@ -217,7 +225,6 @@ function renderCrossword(grid) {
   renderClues();
 }
 
-
 function assignClueNumbers() {
   let clueNumber = 1;
 
@@ -255,8 +262,8 @@ function renderClues() {
 }
 
 async function init() {
-  const cluesData = await fetch('/api/clues');
-  const clues = await cluesData.json();
+  const clues = await fetchData();
+  //const clues = await cluesData.json();
   const layout = [
     { x: 0, y: 0, isHorizontal: true, length: 10 },
     { x: 0, y: 0, isHorizontal: false, length: 5 },
@@ -268,12 +275,11 @@ async function init() {
     { x: 7, y: 4, isHorizontal: false, length: 4 },      
     { x: 9, y: 4, isHorizontal: false, length: 6 },  
     { x: 0, y: 6, isHorizontal: true, length: 6 },
-    { x: 0, y: 6, isHorizontal: false, length: 4 },  
+    { x: 0, y: 6, isHorizontal: false, length: 4 }, 
+    { x: 5, y: 6, isHorizontal: false, length: 4 }, 
     { x: 0, y: 8, isHorizontal: true, length: 4 },   
-    { x: 4, y: 7, isHorizontal: false, length: 4 },
     { x: 4, y: 9, isHorizontal: true, length: 6 },
   ];
-
   const { grid, placedWords } = generateCrossword(clues, layout);
   assignClueNumbers();
   renderCrossword(grid, placedWords);
