@@ -297,9 +297,11 @@ async function init() {
 }
 
 function clearCrossword() {
+  const toggleFocusBtn = document.getElementById('toggle-focus-mode');
   placedWords = [];
   crosswordContainer.innerHTML = '';
   cluesContainer.innerHTML = '';
+  toggleFocusBtn.textContent = 'Writing Direction: Across';
   init();
 }
 
